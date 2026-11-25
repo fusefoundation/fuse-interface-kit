@@ -1,0 +1,571 @@
+// Partner-facing subset of the FUSE Root Candid interface.
+type Account = record { owner : principal; subaccount : opt blob };
+type BondApprovalQuote = record {
+  minimum_allowance_micro_ckusdt : nat;
+  estimated_ledger_fee_micro_ckusdt : nat;
+  ledger : principal;
+  bond_amount_micro_ckusdt : nat;
+  spender : principal;
+};
+type BondClosureView = record {
+  effective_at_ns : nat64;
+  requested_at_ns : opt nat64;
+};
+type BondRecoveryView = record {
+  blocks_scanned : nat32;
+  tip_at_start : nat64;
+  next_index : nat64;
+  bond : BondView;
+  matched_block : opt nat;
+};
+type BondReleaseView = record {
+  confirmed_deposits_micro_ckusdt : nat;
+  interface_open : bool;
+  qualified_at_ns : nat64;
+};
+type BondStage = variant {
+  Refunding;
+  Collecting;
+  Closed;
+  Active;
+  Funded;
+};
+type BondView = record {
+  bond_account_subaccount : blob;
+  controller : principal;
+  domain : text;
+  refund_fee_micro_ckusdt : opt nat;
+  release : opt BondReleaseView;
+  outcome_uncertain : bool;
+  closure : opt BondClosureView;
+  stage : BondStage;
+  amount_micro_ckusdt : nat;
+  ledger : principal;
+  refund_block : opt nat;
+  collection_fee_micro_ckusdt : nat;
+  payout_principal : principal;
+  interface_id : opt nat64;
+  collection_block : opt nat;
+};
+type Capabilities = record {
+  methods : vec text;
+  max_page_items : nat32;
+  api_version : nat32;
+  max_sync_items : nat32;
+  query_certified : bool;
+  external_notification_delivery : bool;
+  token_decimals : nat8;
+  full_participant_roster_public : bool;
+};
+type CharityGoalDraft = record { title : text; details : text };
+type ChoiceViewV3 = variant {
+  Winner : WinnerChoiceViewV2;
+  Income : IncomeChoiceV3;
+  Legacy : PayoutChoiceView;
+};
+type IncomeChoiceV3 = record {
+  request : SelectedIncomeV3;
+  revision : nat64;
+  payout : IncomePayoutViewV3;
+};
+type IncomeFundsV3 = record {
+  needs_reconciliation : bool;
+  source : MoneySource;
+  kind : IncomeKindV3;
+  "reserved" : nat;
+  available : nat;
+  account : principal;
+  pending_payout_id : opt nat;
+  revision : nat64;
+  own_recipient : Account;
+};
+type IncomeInputV3 = record {
+  source : MoneySource;
+  kind : IncomeKindV3;
+  recipient : RecipientChoiceV2;
+  gross : nat;
+  account : principal;
+};
+type IncomeKindV3 = variant { Operator; Interface : nat64 };
+type IncomePayoutViewV3 = record {
+  fee : nat;
+  net : nat;
+  request_id : nat;
+  source : MoneySource;
+  created_at_time_ns : nat64;
+  kind : IncomeKindV3;
+  memo : blob;
+  recipient : Account;
+  stage : PayoutStageView;
+  selected_recipient : bool;
+  scan_next : opt nat64;
+  gross : nat;
+  account : principal;
+};
+type IncomeRecoveryV3 = record {
+  blocks_scanned : nat32;
+  tip_at_start : nat64;
+  next_index : nat64;
+  request : IncomePayoutViewV3;
+  matched_block : opt nat;
+};
+type IncomingRequest = variant {
+  Deposit : record { interface_id : nat64; amount : nat };
+  OwnerFund : record { amount : nat };
+};
+type IncomingStage = variant {
+  NotSent : record { reason : text };
+  Unsigned;
+  Ledger : record { unattributed : bool; ledger_block : nat; credited : bool };
+  Pending;
+};
+type IncomingStatus = record {
+  latest : opt IncomingView;
+  next_revision : nat64;
+  root_available : bool;
+};
+type IncomingView = record {
+  request_id : blob;
+  content : blob;
+  ingress_expiry : nat64;
+  source : MoneySource;
+  owner : principal;
+  request : MoneyRequest;
+  operation_id : blob;
+  confirmed_pending_micro_units : opt nat;
+  stage : IncomingStage;
+  wallet_transport : opt bool;
+  scan_next : nat64;
+  storage_bytes : nat64;
+  revision : nat64;
+  ready : bool;
+};
+type InterfaceDataAutomationStatus = record {
+  last_error : opt text;
+  consecutive_errors : nat32;
+  next_check_ns : opt nat64;
+  last_success_ns : opt nat64;
+  completed_steps : nat64;
+  last_attempt_ns : opt nat64;
+  phase : text;
+};
+type InterfaceDepositView = record {
+  confirmed_original_total_micro_units : opt nat;
+  threshold_micro_units : nat;
+  threshold_met : bool;
+  history_complete : bool;
+  interface_id : nat64;
+  confirmed_at_least_micro_units : nat;
+};
+type InterfaceFundsView = record {
+  needs_reconciliation : bool;
+  controller : principal;
+  reserved_gross_micro_units : nat;
+  pending_payout_id : opt nat;
+  available_micro_units : nat;
+  payout_principal : principal;
+  interface_id : nat64;
+};
+type InterfaceMemoView = record {
+  registration : InterfaceView;
+  memo : blob;
+  issued_at_ns : nat64;
+  interface_id : nat64;
+};
+type InterfaceView = record {
+  id : nat64;
+  controller : principal;
+  registered_at_ns : nat64;
+  payout_principal : principal;
+};
+type LedgerEnvironmentView = variant { MainnetCkUsdt; LocalTest };
+type MoneyObservation = record { certificate : blob; reply : blob };
+type MoneyRequest = variant {
+  SiteVerify;
+  SiteBeginClose;
+  SiteBondScan : record { max_blocks : nat32 };
+  SiteBondStartScan;
+  OwnerResume;
+  OwnerOperatorPayout : record { gross : nat };
+  OwnerCodeExplain : record { change_id : nat64; "text" : text };
+  SitePayoutScan : record { request_id : nat; max_blocks : nat32 };
+  OwnerPause;
+  OwnerCharityPayout : record {
+    destination : principal;
+    gross : nat;
+    purpose : text;
+  };
+  SiteActivate;
+  SitePayout : record { gross : nat; interface_id : nat64 };
+  OwnerCharityReport : record { request_id : nat; "text" : opt text };
+  OwnerLedgerScan : record { max_blocks : nat32 };
+  DepositTransfer : record {
+    fee : nat;
+    memo : blob;
+    created_at_time : nat64;
+    interface_id : nat64;
+    amount : nat;
+  };
+  OwnerFundTransfer : record {
+    fee : nat;
+    memo : blob;
+    created_at_time : nat64;
+    amount : nat;
+  };
+  SiteDepositScan : record { max_blocks : nat32 };
+  OwnerFundConfigure : record { units : nat };
+  ScanPayout : record { request_id : nat; max_blocks : nat32 };
+  OwnerPayoutScan : record { request_id : nat; max_blocks : nat32 };
+  OwnerAutomation : record { enabled : bool };
+  WinnerPayout : record { gross : nat };
+  OwnerCharityGoal : record {
+    goal : opt CharityGoalDraft;
+    expected_revision : nat64;
+  };
+  PrepareDeposit : record { interface_id : nat64; amount : nat };
+  OwnerFundWithdraw : record { gross : nat };
+  SiteApprove : record {
+    fee : nat;
+    created_at_time : nat64;
+    amount : nat;
+    expected_allowance : nat;
+    expires_at : nat64;
+  };
+  SiteClaim : record { domain : text; payout_principal : principal };
+  SiteClose;
+  SiteRelease;
+};
+type MoneySource = record {
+  app : principal;
+  ledger : principal;
+  local_test : bool;
+};
+type PaymentOwnerView = variant {
+  Operator;
+  Winner : text;
+  Charity;
+  Interface : nat64;
+};
+type PayoutCapabilitiesV2 = record {
+  max_scan_blocks : nat32;
+  api_version : nat16;
+  source : MoneySource;
+  linked_external_allowed : bool;
+  supports_subaccounts : bool;
+};
+type PayoutChoiceView = record {
+  request : MoneyRequest;
+  revision : nat64;
+  payout : PayoutRequestView;
+};
+type PayoutRequestView = record {
+  fee : nat;
+  net : nat;
+  request_id : nat;
+  destination : principal;
+  created_at_time_ns : nat64;
+  owner : PaymentOwnerView;
+  memo : blob;
+  owner_fund_source : opt bool;
+  stage : PayoutStageView;
+  scan_next : opt nat64;
+  gross : nat;
+  purpose : opt text;
+};
+type PayoutStageView = variant {
+  NotSent;
+  Paid : record { at_ns : nat64; ledger_block : nat };
+  Unknown;
+  Pending;
+};
+type PrizeCursor = record { cycle_id : nat64; winner_offset : nat64 };
+type PrizeEvent = record {
+  cursor : PrizeCursor;
+  tour_day_start_ns : nat64;
+  accrued_micro_units : nat;
+  roster_audit_available : bool;
+  utc_day : nat64;
+  wallet : text;
+  event_id : text;
+};
+type PrizePage = record {
+  available_tours : nat64;
+  next_after : opt PrizeCursor;
+  caught_up : bool;
+  indexed_through_cycle : nat64;
+  items : vec PrizeEvent;
+};
+type Progress = record {
+  winners_processed : nat64;
+  available_tours : nat64;
+  caught_up : bool;
+  indexed_rosters_complete : bool;
+  indexed_through_cycle : nat64;
+  roster_processed : nat64;
+  building_cycle : opt nat64;
+};
+type ProjectStatistics = record {
+  accounted_received_micro_units : nat;
+  project_subaccount : opt blob;
+  api_version : nat32;
+  observed_at_ns : nat64;
+  payout_requests : nat64;
+  progress : Progress;
+  unique_paid_wallets_in_indexed_tours : opt nat64;
+  ledger : text;
+  pending_cycle_id : opt nat64;
+  financial_wallet_records : nat64;
+  token_decimals : nat8;
+  totals_of_indexed_tours : Totals_1;
+  accounted_paid_micro_units : nat;
+  pause_events : nat64;
+  credited_deposit_blocks : nat64;
+  paused : bool;
+  project_account : text;
+};
+type PublicProtocolStatus = record {
+  next_cycle_day : opt nat64;
+  tours : nat64;
+  paused : bool;
+};
+type QuoteView = record {
+  virtual_reserve_credit : nat;
+  operator : nat;
+  interfaces : nat;
+  gross : nat;
+  real_wallets : nat;
+  prize : nat;
+  charity : nat;
+  virtual_units : nat;
+  winners : nat;
+};
+type RecipientChoiceV2 = variant { OwnAccount; OtherAccount : Account };
+type Result_1 = variant { Ok : BondView; Err : text };
+type Result_104 = variant { Ok : InterfaceDepositView; Err : text };
+type Result_112 = variant { Ok : PublicProtocolStatus; Err : text };
+type Result_119 = variant { Ok : ChoiceViewV3; Err : text };
+type Result_121 = variant { Ok : SiteClaimView; Err : text };
+type Result_124 = variant { Ok : IncomeRecoveryV3; Err : text };
+type Result_126 = variant { Ok : BondRecoveryView; Err : text };
+type Result_13 = variant { Ok : IncomingView; Err : text };
+type Result_135 = variant { Ok : StatisticsPage; Err : text };
+type Result_14 = variant { Ok : SiteApprovalView; Err : text };
+type Result_142 = variant { Ok : WalletRuntimeCapabilities; Err : text };
+type Result_21 = variant { Ok : BondApprovalQuote; Err : text };
+type Result_41 = variant { Ok : PayoutCapabilitiesV2; Err : text };
+type Result_42 = variant { Ok : IncomePayoutViewV3; Err : text };
+type Result_46 = variant { Ok : opt InterfaceMemoView; Err : text };
+type Result_47 = variant { Ok : opt InterfaceView; Err : text };
+type Result_50 = variant { Ok : IncomingStatus; Err : text };
+type Result_57 = variant { Ok : IncomeFundsV3; Err : text };
+type Result_58 = variant { Ok : opt IncomingView; Err : text };
+type Result_59 = variant { Ok : opt BondView; Err : text };
+type Result_60 = variant { Ok : opt InterfaceFundsView; Err : text };
+type Result_70 = variant { Ok : WalletFundsView; Err : text };
+type Result_71 = variant { Ok : opt ChoiceViewV3; Err : text };
+type Result_74 = variant { Ok : PrizePage; Err : text };
+type Result_75 = variant { Ok : opt SiteApprovalView; Err : text };
+type Result_76 = variant { Ok : SiteApprovalStatus; Err : text };
+type Result_77 = variant { Ok : opt SiteBondContext; Err : text };
+type Result_78 = variant { Ok : opt SiteClaimView; Err : text };
+type Result_92 = variant { Ok : ProjectStatistics; Err : text };
+type SelectedIncomeV3 = record {
+  fee : nat;
+  source : MoneySource;
+  kind : IncomeKindV3;
+  recipient : Account;
+  gross : nat;
+  account : principal;
+  own_account : bool;
+};
+type SelectedWinnerRequestV2 = record {
+  fee : nat;
+  source : MoneySource;
+  recipient : Account;
+  gross : nat;
+  account : principal;
+  own_account : bool;
+};
+type SiteApprovalStage = variant {
+  NotSent : record { reason : text };
+  Approved : record { ledger_block : nat };
+  Unsigned;
+  Pending;
+};
+type SiteApprovalStatus = record {
+  latest : opt SiteApprovalView;
+  next_revision : nat64;
+  root_available : bool;
+};
+type SiteApprovalView = record {
+  request_id : blob;
+  content : blob;
+  ingress_expiry : nat64;
+  source : MoneySource;
+  owner : principal;
+  request : MoneyRequest;
+  operation_id : blob;
+  stage : SiteApprovalStage;
+  scan_next : nat64;
+  storage_bytes : nat64;
+  revision : nat64;
+  ready : bool;
+  claim_binding : blob;
+};
+type SiteBondAction = variant {
+  Release;
+  Fund;
+  BeginCloseAt : record { revision : nat64 };
+  BeginClose;
+  Activate;
+  CancelClose : record { requested_at_ns : nat64; revision : nat64 };
+  Close;
+};
+type SiteBondContext = record {
+  controller : principal;
+  closure_revision : opt nat64;
+  claim_id : nat64;
+  ledger : principal;
+  claim_binding : blob;
+};
+type SiteClaimView = record {
+  id : nat64;
+  controller : principal;
+  verification_url : text;
+  domain : text;
+  valid_until_ns : opt nat64;
+  verified_at_ns : opt nat64;
+  last_checked_at_ns : opt nat64;
+  verification_text : text;
+  payout_principal : principal;
+  requested_at_ns : nat64;
+};
+type StatisticsPage = record {
+  next_after_cycle : opt nat64;
+  available_tours : nat64;
+  caught_up : bool;
+  indexed_through_cycle : nat64;
+  items : vec TourStatistics;
+};
+type Totals_1 = record {
+  virtual_contributions_micro_units : nat;
+  winner_awards : nat;
+  unique_wallets_in_available_rosters : nat64;
+  prizes_accrued_micro_units : nat;
+  interfaces_accrued_micro_units : nat;
+  paid_wallet_participations : nat;
+  real_contributions_micro_units : nat;
+  operator_accrued_micro_units : nat;
+  owner_fund_contributions_micro_units : nat;
+  gross_contributions_micro_units : nat;
+  charity_accrued_micro_units : nat;
+  virtual_reserve_accrued_micro_units : nat;
+};
+type TourStatistics = record {
+  first_time_paid_wallets : opt nat64;
+  retained_from_previous_tour : opt nat64;
+  returned_after_gap : opt nat64;
+  quote : QuoteView;
+  owner_fund_units : nat;
+  roster_available : bool;
+  utc_day : nat64;
+  paid_wallets : nat64;
+  unique_paid_wallets_through_tour : opt nat64;
+  previous_utc_day : opt nat64;
+  cycle_id : nat64;
+  absent_since_previous_tour : opt nat64;
+  known_unique_wallets_lower_bound : nat64;
+  previous_cycle_id : opt nat64;
+};
+type TrustedLedgerView = record {
+  decimals : nat8;
+  ledger : principal;
+  financial_ingest_enabled : bool;
+  environment : LedgerEnvironmentView;
+  pinned_at_ns : nat64;
+};
+type WalletFundsView = record {
+  needs_reconciliation : bool;
+  winnings_available_micro_units : nat;
+  prepaid_micro_units : nat;
+  pending_payout_id : opt nat;
+  wallet : principal;
+  winnings_reserved_micro_units : nat;
+  confirmed_pending_prepayment_micro_units : opt nat;
+  trusted_ledger : opt TrustedLedgerView;
+};
+type WalletRuntimeCapabilities = record {
+  api_version : nat32;
+  source : MoneySource;
+  account_links : bool;
+  wallet_read_sessions : opt bool;
+  deposits : bool;
+  photos : bool;
+};
+type WinnerChoiceViewV2 = record {
+  request : SelectedWinnerRequestV2;
+  revision : nat64;
+  payout : WinnerPayoutViewV2;
+};
+type WinnerPayoutViewV2 = record {
+  fee : nat;
+  net : nat;
+  request_id : nat;
+  source : MoneySource;
+  created_at_time_ns : nat64;
+  memo : blob;
+  recipient : Account;
+  stage : PayoutStageView;
+  selected_recipient : bool;
+  scan_next : opt nat64;
+  gross : nat;
+  account : principal;
+};
+service : {
+  arm_incoming_choice : (nat64) -> (Result_13);
+  arm_site_approval_choice : (nat64) -> (Result_14);
+  bond_approval_quote : () -> (Result_21);
+  choose_incoming_from_view : (nat64, IncomingRequest, nat) -> (Result_13);
+  choose_site_approval_from_view : (nat64, blob, nat, nat) -> (Result_14);
+  choose_wallet_incoming_from_view : (nat64, IncomingRequest, nat) -> (
+      Result_13,
+    );
+  confirm_incoming_block : (nat64, nat) -> (Result_13);
+  income_payout_capabilities_v3 : () -> (Result_41) query;
+  income_payout_status_v3 : (nat) -> (Result_42) query;
+  interface_data_automation_status : () -> (
+      InterfaceDataAutomationStatus,
+    ) query;
+  interface_data_capabilities : () -> (Capabilities) query;
+  interface_deposit_memo : (nat64) -> (Result_46) query;
+  interface_info : (nat64) -> (Result_47) query;
+  my_income_funds_v3 : (IncomeKindV3) -> (Result_57) query;
+  my_incoming_choice : (nat64) -> (Result_58) query;
+  my_incoming_status : () -> (Result_50) query;
+  my_interface : () -> (Result_47) query;
+  my_interface_bond : () -> (Result_59) query;
+  my_interface_funds : () -> (Result_60) query;
+  my_participant_wallet_funds : () -> (Result_70) query;
+  my_payout_choice_v3 : (nat64) -> (Result_71) query;
+  my_site_approval_choice : (nat64) -> (Result_75) query;
+  my_site_approval_status : () -> (Result_76) query;
+  my_site_bond_context : () -> (Result_77) query;
+  my_site_claim : () -> (Result_78) query;
+  observe_incoming_choice : (nat64, MoneyObservation) -> (Result_13);
+  observe_site_approval_choice : (nat64, MoneyObservation) -> (Result_14);
+  observe_wallet_incoming_choice : (nat64, blob, blob) -> (Result_13);
+  project_statistics : () -> (Result_92) query;
+  public_interface_deposits : (nat64) -> (Result_104) query;
+  public_prize_events : (opt PrizeCursor, nat32) -> (Result_74) query;
+  public_protocol_status : () -> (Result_112) query;
+  request_income_payout_v3 : (nat64, IncomeInputV3, nat) -> (Result_119);
+  request_site_claim_from_view : (opt blob, text, principal) -> (Result_121);
+  scan_income_payout_v3 : (nat, nat32) -> (Result_124);
+  scan_incoming_choice : (nat64, nat32) -> (Result_13);
+  scan_pending_interface_bond : (nat32) -> (Result_126);
+  scan_site_approval_choice : (nat64, nat32) -> (Result_14);
+  site_bond_action_from_view : (nat64, blob, SiteBondAction) -> (Result_1);
+  tour_statistics_page : (opt nat64, nat32) -> (Result_135) query;
+  verify_site_claim_from_view : (blob, opt nat64) -> (Result_121);
+  wallet_runtime_capabilities : () -> (Result_142) query;
+}

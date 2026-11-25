@@ -1,0 +1,15 @@
+{
+  "name": "fuse-interface-kit",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test": "node --test",
+    "read": "node examples/read-interface.mjs"
+  },
+  "dependencies": {
+    "@icp-sdk/core": "6.1.1",
+    "@icp-sdk/signer": "6.1.0"
+  }
+}
