@@ -2,7 +2,7 @@
 
 An independent browser interface for public FUSE round results. The browser uses the kit’s anonymous agent and verifies query signatures against the ICP mainnet root key.
 
-[Official FUSE website](https://fuseprotocol.org/) · [Live demo](https://public-round-reader.sergeysolomatin.chatgpt.site/) · [FUSE Interface Kit](../../README.md)
+[Official FUSE website](https://fuseprotocol.org/) · [Live demo](https://rounds.fuseprotocol.org/) · [FUSE Interface Kit](../../README.md)
 
 ## Run your own copy
 
