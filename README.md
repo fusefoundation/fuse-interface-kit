@@ -2,6 +2,18 @@
 
 Build an independent website that connects to FUSE on the Internet Computer. You build the interface; FUSE records participation, calculates rounds, and tracks payouts.
 
+[Official FUSE website](https://fuseprotocol.org/) · [Developer Docs](https://fuse-foundation.gitbook.io/fuse-foundation-docs/) · [Live Round Reader](https://public-round-reader.sergeysolomatin.chatgpt.site/)
+
+## Try the browser demo
+
+[**Open Round Reader**](https://public-round-reader.sergeysolomatin.chatgpt.site/) to see the latest published round and browse the archive. This independent example uses only public FUSE queries. It does not require a wallet, registration, or payments. The `(?)` disclosures show the exact calls behind the interface.
+
+[![Round Reader showing the latest published round, the archive, and an expanded read-only query example](docs/images/round-reader.jpg)](https://public-round-reader.sergeysolomatin.chatgpt.site/)
+
+[Browse the example source and setup steps](examples/round-reader/README.md).
+
+## Start building
+
 1. Start with the [FUSE Interface Guide](https://fuse-foundation.gitbook.io/fuse-foundation-docs/). You can read public round results without a wallet, registration, or bond: see [Read rounds without registering](#read-rounds-without-registering).
 2. Follow [Register and activate your website](docs/QUICKSTART.md). After activation, save the assigned `interface_id` and deposit `memo`.
 3. Read the [API reference](docs/API.md), validate your configuration, and test the integration before enabling participant payments.
@@ -50,3 +62,7 @@ rm -rf -- "$FUSE_KIT_DIR"
 ```
 
 Open a new Codex session and invoke `$fuse-interface`. Give it the domain, the interface ID if assigned, and the task. Public configuration is enough for read-only work. Do not share keys or wallet credentials.
+
+## Security
+
+See the [security policy](SECURITY.md) for private reporting.
