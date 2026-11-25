@@ -2,6 +2,8 @@
 
 You need an HTTPS website where you can publish a verification file, an Internet Identity account for managing the interface, and ckUSDT for the registration bond and fees. You can build a read-only interface without registering or funding a bond. For a pilot, ask FUSE for the test environment configuration; keep it separate from mainnet.
 
+If you only need public round data, run `npm run rounds` from the cloned kit after `npm ci`. You can prototype without an interface ID, an Internet Identity, or a bond. Follow the steps below only when you need to register a website.
+
 ## 1. Sign in to the interface dashboard
 
 Open [My website](https://int.fuseprotocol.org/site) and sign in with Internet Identity. Your principal becomes the site `controller`. It manages registration, bond recovery, and operator withdrawals. Keep access to that account and never enter a seed phrase on the site.
@@ -81,3 +83,5 @@ Your interface earns **4% of eligible, attributed real daily contributions used 
 - **Close the site:** closure takes effect after seven days. Then you can request recovery of any bond still held. Existing earnings remain available. Remove the deposit form: after closure, transfers using the old memo are attributed to the default interface.
 
 For help, email [partners@fuseprotocol.org](mailto:partners@fuseprotocol.org) with the domain, interface ID if available, error message, and the operation or block number if relevant. Never send keys, delegations, seed phrases, or login codes.
+
+Before go-live, use the [launch checklist](LAUNCH-CHECKLIST.md).

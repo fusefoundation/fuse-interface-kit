@@ -521,6 +521,73 @@ type WinnerPayoutViewV2 = record {
   gross : nat;
   account : principal;
 };
+type TourSummaryView = record {
+  winners_count : nat64;
+  quote : QuoteView;
+  owner_fund_units : opt nat;
+  roster_audit_available : bool;
+  random_words_count : nat64;
+  utc_day : nat64;
+  cycle_id : nat64;
+};
+type PreparedDistributionView = record {
+  prize_micro_units : nat;
+  maximum_award_micro_units : nat;
+  gross_micro_units : nat;
+  utc_day : nat64;
+  cycle_id : nat64;
+  winners : nat;
+  minimum_award_micro_units : nat;
+};
+type ForecastDistributionView = record {
+  method : text;
+  prize_micro_units : nat;
+  accounted_through_block : opt nat;
+  owner_fund_units : nat;
+  calculated_at_ns : nat64;
+  maximum_award_micro_units : nat;
+  gross_micro_units : nat;
+  utc_day : nat64;
+  real_wallets : nat;
+  virtual_units : nat;
+  winners : nat;
+  minimum_award_micro_units : nat;
+};
+type DistributionSummaryView = record {
+  api_version : nat32;
+  prepared : opt PreparedDistributionView;
+  forecast_unavailable : opt text;
+  forecast : opt ForecastDistributionView;
+};
+type DaySummaryView = record {
+  saved_random_chunks : opt nat32;
+  latest_tour : opt TourSummaryView;
+  pending_utc_day : opt nat64;
+  distribution : opt DistributionSummaryView;
+};
+type Result_33 = variant { Ok : DaySummaryView; Err : text };
+type Result_136 = variant { Ok : TourSummaryView; Err : text };
+type TourPageView = record {
+  next_start : opt nat64;
+  total : nat64;
+  start : nat64;
+  items : vec nat64;
+  cycle_id : nat64;
+};
+type Result_134 = variant { Ok : TourPageView; Err : text };
+type WinnerView = record {
+  wallet_principal : text;
+  participant_index : nat64;
+  amount : nat;
+};
+type TourPageView_1 = record {
+  next_start : opt nat64;
+  total : nat64;
+  start : nat64;
+  items : vec WinnerView;
+  cycle_id : nat64;
+};
+type Result_137 = variant { Ok : TourPageView_1; Err : text };
 service : {
   arm_incoming_choice : (nat64) -> (Result_13);
   arm_site_approval_choice : (nat64) -> (Result_14);
@@ -565,6 +632,10 @@ service : {
   scan_pending_interface_bond : (nat32) -> (Result_126);
   scan_site_approval_choice : (nat64, nat32) -> (Result_14);
   site_bond_action_from_view : (nat64, blob, SiteBondAction) -> (Result_1);
+  current_tour_summary : () -> (Result_33) query;
+  tour_summary : (nat64) -> (Result_136) query;
+  tour_random_words_page : (nat64, nat64, nat32) -> (Result_134) query;
+  tour_winners_page : (nat64, nat64, nat32) -> (Result_137) query;
   tour_statistics_page : (opt nat64, nat32) -> (Result_135) query;
   verify_site_claim_from_view : (blob, opt nat64) -> (Result_121);
   wallet_runtime_capabilities : () -> (Result_142) query;

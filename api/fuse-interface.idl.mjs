@@ -1,4 +1,4 @@
-// Generated from fuse-interface.did by candid_parser 0.3.2.
+// Bindings for fuse-interface.did. Keep the Candid and read-only round tests in sync.
 export const idlFactory = ({ IDL }) => {
   const MoneySource = IDL.Record({
     'app' : IDL.Principal,
@@ -616,6 +616,85 @@ export const idlFactory = ({ IDL }) => {
     'Ok' : WalletRuntimeCapabilities,
     'Err' : IDL.Text,
   });
+  const TourSummaryView = IDL.Record({
+    winners_count: IDL.Nat64,
+    quote: QuoteView,
+    owner_fund_units: IDL.Opt(IDL.Nat),
+    roster_audit_available: IDL.Bool,
+    random_words_count: IDL.Nat64,
+    utc_day: IDL.Nat64,
+    cycle_id: IDL.Nat64,
+  });
+  const PreparedDistributionView = IDL.Record({
+    prize_micro_units: IDL.Nat,
+    maximum_award_micro_units: IDL.Nat,
+    gross_micro_units: IDL.Nat,
+    utc_day: IDL.Nat64,
+    cycle_id: IDL.Nat64,
+    winners: IDL.Nat,
+    minimum_award_micro_units: IDL.Nat,
+  });
+  const ForecastDistributionView = IDL.Record({
+    method: IDL.Text,
+    prize_micro_units: IDL.Nat,
+    accounted_through_block: IDL.Opt(IDL.Nat),
+    owner_fund_units: IDL.Nat,
+    calculated_at_ns: IDL.Nat64,
+    maximum_award_micro_units: IDL.Nat,
+    gross_micro_units: IDL.Nat,
+    utc_day: IDL.Nat64,
+    real_wallets: IDL.Nat,
+    virtual_units: IDL.Nat,
+    winners: IDL.Nat,
+    minimum_award_micro_units: IDL.Nat,
+  });
+  const DistributionSummaryView = IDL.Record({
+    api_version: IDL.Nat32,
+    prepared: IDL.Opt(PreparedDistributionView),
+    forecast_unavailable: IDL.Opt(IDL.Text),
+    forecast: IDL.Opt(ForecastDistributionView),
+  });
+  const DaySummaryView = IDL.Record({
+    saved_random_chunks: IDL.Opt(IDL.Nat32),
+    latest_tour: IDL.Opt(TourSummaryView),
+    pending_utc_day: IDL.Opt(IDL.Nat64),
+    distribution: IDL.Opt(DistributionSummaryView),
+  });
+  const Result_33 = IDL.Variant({
+    Ok: DaySummaryView,
+    Err: IDL.Text,
+  });
+  const Result_136 = IDL.Variant({
+    Ok: TourSummaryView,
+    Err: IDL.Text,
+  });
+  const TourPageView = IDL.Record({
+    next_start: IDL.Opt(IDL.Nat64),
+    total: IDL.Nat64,
+    start: IDL.Nat64,
+    items: IDL.Vec(IDL.Nat64),
+    cycle_id: IDL.Nat64,
+  });
+  const Result_134 = IDL.Variant({
+    Ok: TourPageView,
+    Err: IDL.Text,
+  });
+  const WinnerView = IDL.Record({
+    wallet_principal: IDL.Text,
+    participant_index: IDL.Nat64,
+    amount: IDL.Nat,
+  });
+  const TourPageView_1 = IDL.Record({
+    next_start: IDL.Opt(IDL.Nat64),
+    total: IDL.Nat64,
+    start: IDL.Nat64,
+    items: IDL.Vec(WinnerView),
+    cycle_id: IDL.Nat64,
+  });
+  const Result_137 = IDL.Variant({
+    Ok: TourPageView_1,
+    Err: IDL.Text,
+  });
   return IDL.Service({
     'arm_incoming_choice' : IDL.Func([IDL.Nat64], [Result_13], []),
     'arm_site_approval_choice' : IDL.Func([IDL.Nat64], [Result_14], []),
@@ -708,6 +787,10 @@ export const idlFactory = ({ IDL }) => {
         [Result_1],
         [],
       ),
+    'current_tour_summary' : IDL.Func([], [Result_33], ['query']),
+    'tour_summary' : IDL.Func([IDL.Nat64], [Result_136], ['query']),
+    'tour_random_words_page' : IDL.Func([IDL.Nat64, IDL.Nat64, IDL.Nat32], [Result_134], ['query']),
+    'tour_winners_page' : IDL.Func([IDL.Nat64, IDL.Nat64, IDL.Nat32], [Result_137], ['query']),
     'tour_statistics_page' : IDL.Func(
         [IDL.Opt(IDL.Nat64), IDL.Nat32],
         [Result_135],

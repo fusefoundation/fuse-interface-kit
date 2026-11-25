@@ -27,6 +27,10 @@ Use the [Candid contract](../api/fuse-interface.did) or the [JavaScript bindings
 | `interface_data_capabilities()` | Public API version, publishing capabilities and page limits. |
 | `interface_data_automation_status()` | Public data processing status. |
 | `project_statistics()` | Aggregates and `progress.caught_up`. Expose the last indexed round if behind. |
+| `current_tour_summary()` | Latest published summary and optional data for the pending round. |
+| `tour_summary(cycle_id)` | Summary for one published round, including recipient and audit-data counts. |
+| `tour_winners_page(cycle_id, start, limit)` | Published recipients. Start at `0n` and follow `next_start`. |
+| `tour_random_words_page(cycle_id, start, limit)` | Stored random words, when available. Follow the same pagination pattern. |
 | `tour_statistics_page(after, limit)` | Start with `after = []` and continue with `next_after_cycle`. |
 | `public_prize_events(after, limit)` | Prize credits. Start with `after = []`, continue with `next_after`, and deduplicate by `event_id`. A credit and a confirmed payout are separate. |
 
@@ -39,6 +43,14 @@ console.log(binding.memoHex, String(progress.confirmed_at_least_micro_units));
 ```
 
 Respect `max_page_items` and cache public statistics. Label stale data with the last successful read time. Recheck registration before creating a new operation.
+
+### Published results, forecasts, and audit data
+
+Run `npm run rounds` with no account or interface ID. Missing optional data is returned as `null`. Do not label a missing or unavailable forecast as zero.
+
+- **Forecast:** use `distribution.forecast[0]` when present. `real_wallets` and `winners` are from the same forecast snapshot. Label the figures estimated and show `calculated_at_ns`. Do not combine forecast counts with a published result or a prepared round.
+- **Published:** use `tour_summary(cycle_id)` or the `latest_tour` field. The published recipient share is `winners_count / quote.real_wallets` when the denominator is positive. For example, 2 of 800 eligible wallets is 0.25%. Virtual units are not eligible wallets.
+- **Audit:** check `roster_audit_available` and `random_words_count`. For pages, request the same cycle ID and follow `next_start` until the option is empty. The [ICP management canister](https://docs.internetcomputer.org/references/management-canister/#raw_rand) supplies the randomness. Stored words alone are not enough to replay the draw independently; exact selection rules and the eligible roster are also needed.
 
 ## Registration, bond, and operator earnings
 
